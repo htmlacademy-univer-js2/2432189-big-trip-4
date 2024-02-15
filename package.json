@@ -16,9 +16,9 @@
     "start": "webpack serve --mode development --open"
   },
   "devDependencies": {
-    "@babel/core": "^7.23.9",
-    "@babel/preset-env": "^7.23.9",
-    "babel-loader": "^9.1.3",
+    "@babel/core": "7.23.9",
+    "@babel/preset-env": "7.23.9",
+    "babel-loader": "9.1.3",
     "copy-webpack-plugin": "11.0.0",
     "eslint": "8.28.0",
     "eslint-config-htmlacademy": "8.0.0",
