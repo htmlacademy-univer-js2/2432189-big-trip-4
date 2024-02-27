@@ -42,13 +42,13 @@ function createEventElement() {
 }
 
 export default class eventElementView {
-    getTeplate() {
+    getTemplate() {
         return createEventElement;
     }
 
     getElement() {
         if (!this.element) {
-            this.element = createElement(this.getTeplate());
+            this.element = createElement(this.getTemplate());
         }
 
         return this.element;

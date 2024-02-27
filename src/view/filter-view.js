@@ -26,13 +26,13 @@ const createFilterTemplate = () => `
 </form>`;
 
 export default class filterView{
-  getTeplate() {
+  getTemplate() {
     return createFilterTemplate;
   }
 
   getElement() {
     if (!this.element){
-      this.element = createElement(this.getTeplate());
+      this.element = createElement(this.getTemplate());
     }
 
     return this.element;
