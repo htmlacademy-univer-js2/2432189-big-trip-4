@@ -31,13 +31,13 @@ function createSortElement() {
 }
 
 export default class sortElementView {
-    getTeplate() {
+    getTemplate() {
         return createSortElement;
     }
     
     getElement() {
     if (!this.element){
-        this.element = createElement(this.getTeplate());
+        this.element = createElement(this.getTemplate());
     }
     
     return this.element;
