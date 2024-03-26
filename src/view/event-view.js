@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
-import { createElement } from '../render';
-import { timeDurationHours, timeDurationMinutes } from '../utils';
+import AbstractView from '../framework/view/abstract-view';
+import { timeDurationDays, timeDurationHours, timeDurationMinutes } from '../utils';
 
 function createNewPointOfferTemplate(offer) {
   return (
@@ -19,8 +19,9 @@ function createEventElement(point) {
 
   const { city } = destination;
 
+  const days = timeDurationDays(date.dateStart, date.dateEnd) === 0 ? '' : `${timeDurationDays(date.dateStart, date.dateEnd)}D`;
   const hours = timeDurationHours(date.dateStart, date.dateEnd) === 0 ? '' : `${timeDurationHours(date.dateStart, date.dateEnd)}H`;
-  const minutes = timeDurationMinutes(date.dateStart, date.dateEnd) === 0 ? '' : `${timeDurationMinutes(date.dateStart, date.dateEnd)}H`;
+  const minutes = timeDurationMinutes(date.dateStart, date.dateEnd) === 0 ? '' : `${timeDurationMinutes(date.dateStart, date.dateEnd)}M`;
 
   const eventFavorite = isFavorite && true ? 'event__favorite-btn--active' : '';
 
@@ -37,7 +38,7 @@ function createEventElement(point) {
                         &mdash;
                         <time class="event__end-time" datetime="${date.dateStart}">${dayjs(date.dateEnd).format('HH:mm')}</time>
                     </p>
-                    <p class="event__duration">${hours} ${minutes}</p>
+                    <p class="event__duration">${days} ${hours} ${minutes}</p>
                 </div>
                 <p class="event__price">
                     &euro;&nbsp;<span class="event__price-value">${price}</span>
@@ -59,24 +60,26 @@ function createEventElement(point) {
         </li>`;
 }
 
-export default class eventElementView {
-  constructor({point}){
-    this.point = point;
+export default class eventElementView extends AbstractView {
+  #point = null;
+  #onEditClick = null;
+
+  constructor({point, onEditClick}) {
+    super();
+    this.#point = point;
+    this.#onEditClick = onEditClick;
+
+    this.element
+      .querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#editClcikHandler);
   }
 
-  getTemplate() {
-    return createEventElement(this.point);
-  }
+  #editClcikHandler = (evt) => {
+    evt.preventDefault();
+    this.#onEditClick();
+  };
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createEventElement(this.#point);
   }
 }
