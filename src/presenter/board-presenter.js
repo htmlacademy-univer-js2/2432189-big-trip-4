@@ -1,4 +1,4 @@
-import { render } from '../render.js';
+import { render, replace } from '../framework/render.js';
 import EventsListView from '../view/events-list-view.js';
 import SortView from '../view/sort-view.js';
 import EventEditView from '../view/event-edit-view.js';
@@ -6,23 +6,61 @@ import EventView from '../view/event-view.js';
 
 
 export default class BoardPresenter {
-
-  eventsListComponent = new EventsListView();
+  #eventsListComponent = new EventsListView();
+  #container = null;
+  #pointsModel = null;
+  #sortComponent = new SortView();
+  #boardPoints = [];
 
   constructor({container, pointsModel}) {
-    this.container = container;
-    this.pointsModel = pointsModel;
+    this.#container = container;
+    this.#pointsModel = pointsModel;
   }
 
   init() {
-    this.boardPoints = [...this.pointsModel.getPoints()];
+    this.#boardPoints = [...this.#pointsModel.points];
 
-    render(new SortView(), this.container);
-    render(this.eventsListComponent, this.container);
-    render(new EventEditView({point: this.boardPoints[0]}), this.eventsListComponent.getElement());
+    render(this.#sortComponent, this.#container);
+    render(this.#eventsListComponent, this.#container);
 
-    for (let i = 0; i < this.boardPoints.length; i++) {
-      render(new EventView({point: this.boardPoints[i]}), this.eventsListComponent.getElement());
+    this.#boardPoints.forEach((point) => this.#renderPoints(point));
+  }
+
+  #renderPoints(point) {
+    const componentEvent = new EventView({
+      point,
+      onEditClick,
+    });
+
+    const componentEventEdit = new EventEditView({
+      point,
+      onResetClick,
+      onSubmiClick,
+    });
+
+    const escKeydown = (evt) => {
+      if (evt.key === 'Escape') {
+        evt.preventDefault();
+        replace(componentEvent, componentEventEdit);
+        document.removeEventListener('keydown', escKeydown);
+      }
+    };
+
+    function onEditClick() {
+      replace(componentEventEdit, componentEvent);
+      document.addEventListener('keydown', escKeydown);
     }
+
+    function onSubmiClick() {
+      replace(componentEvent, componentEventEdit);
+      document.removeEventListener('keydown', escKeydown);
+    }
+
+    function onResetClick() {
+      replace(componentEvent, componentEventEdit);
+      document.removeEventListener('keydown', escKeydown);
+    }
+
+    render(componentEvent, this.#eventsListComponent.element);
   }
 }

@@ -1,5 +1,4 @@
-
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view';
 import dayjs from 'dayjs';
 
 const BLANK_POINT = {
@@ -18,7 +17,7 @@ function getOffers(offer) {
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
         <div class="event__available-offers">
             ${Array.from(new Set(offer)).map(([title, price]) => `<div class="event__offer-selector">
-                <input class="event__offer-checkbox  visually-hidden" id="event-offer-train-1" type="checkbox" name="event-offer-train">
+                <input class="event__offer-checkbox  visually-hidden" id="event-offer-train-1" type="checkbox" name="event-offer-train" checked>
                     <label class="event__offer-label" for="event-offer-train-1">
                         <span class="event__offer-title">${title}</span>
                             &plus;&euro;&nbsp;
@@ -103,24 +102,37 @@ function createEventEditElement(point) {
 </li>`;
 }
 
-export default class eventEditView {
-  constructor({point = BLANK_POINT}){
-    this.point = point;
+export default class eventEditView extends AbstractView {
+  #point = null;
+  #onResetClick = null;
+  #onSubmiClick = null;
+
+  constructor({point = BLANK_POINT, onResetClick, onSubmiClick}){
+    super();
+    this.#point = point;
+    this.#onResetClick = onResetClick;
+    this.#onSubmiClick = onSubmiClick;
+
+    this.element
+      .querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#resetClickHandler);
+
+    this.element
+      .querySelector('form')
+      .addEventListener('submit', this.#submiClickHandler);
   }
 
-  getTemplate() {
-    return createEventEditElement(this.point);
-  }
+  #resetClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#onResetClick();
+  };
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
+  #submiClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#onSubmiClick();
+  };
 
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createEventEditElement(this.#point);
   }
 }
