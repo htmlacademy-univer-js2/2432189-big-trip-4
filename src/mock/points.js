@@ -1,6 +1,6 @@
 import { getRandomElement, getRandomInteger } from '../utils';
 import { DESTINATION, DATE, POINT_TYPES, OFFER } from '../const';
-import { getRandomDescription } from './description';
+import { getRandomDescription } from './destination';
 
 const BORDER = 5;
 
