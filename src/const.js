@@ -53,4 +53,11 @@ const DESCRIPTION = new Map([
   [4, 'Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus.']
 ]);
 
-export {POINT_TYPES, DATE, DESTINATION, OFFER, DESCRIPTION};
+const FilterType = {
+  EVERYTHING: 'everything',
+  FUTURE: 'future',
+  PRESENT: 'present',
+  PAST: 'past'
+};
+
+export { POINT_TYPES, DATE, DESTINATION, OFFER, DESCRIPTION, FilterType };

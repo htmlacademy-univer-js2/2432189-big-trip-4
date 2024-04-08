@@ -3,6 +3,7 @@ import EventsListView from '../view/events-list-view.js';
 import SortView from '../view/sort-view.js';
 import EventEditView from '../view/event-edit-view.js';
 import EventView from '../view/event-view.js';
+import EventEmptyElement from '../view/event-list-empty-view.js';
 
 
 export default class BoardPresenter {
@@ -19,6 +20,11 @@ export default class BoardPresenter {
 
   init() {
     this.#boardPoints = [...this.#pointsModel.points];
+
+    if (this.#boardPoints.length === 0){
+      render(new EventEmptyElement(), this.#container);
+      return;
+    }
 
     render(this.#sortComponent, this.#container);
     render(this.#eventsListComponent, this.#container);
