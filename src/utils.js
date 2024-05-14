@@ -21,23 +21,27 @@ function timeDurationMinutes(start, end) {
   return dayjs(end).diff(start, 'minute') % 60;
 }
 
-function isEventFuture(event) {
-  return dayjs().isBefore(event.start);
+function isEventFuture(dueDate) {
+  return dueDate.dateStart && dayjs().isBefore(dueDate.dateStart, 'D');
 }
 
-function isEventPresent(event) {
-  return dayjs().isAfter(event.dateFrom) && dayjs().isBefore(event.dateTo);
+function isEventPresent(dueDate) {
+  return dueDate.dateStart && dueDate.dateEnd && dayjs(dueDate.dateStart).isSame(dayjs(), 'D');
 }
 
-function isEventPast(event) {
-  return dayjs().isAfter(event.end);
+function isEventPast(dueDate) {
+  return dueDate.dateEnd && dayjs().isAfter(dueDate.dateEnd, 'D');
+}
+
+function updateItem(items, update) {
+  return items.map((item) => item.id === update.id ? update : item);
 }
 
 const filter = {
   [FilterType.EVERYTHING]: (events) => [...events],
-  [FilterType.FUTURE]: (events) => events.filter((event) => isEventFuture(event)),
-  [FilterType.PRESENT]: (events) => events.filter((event) => isEventPresent(event)),
-  [FilterType.PAST]: (events) => events.filter((event) => isEventPast(event)),
+  [FilterType.FUTURE]: (events) => events.filter((event) => isEventFuture(event.date)),
+  [FilterType.PRESENT]: (events) => events.filter((event) => isEventPresent(event.date)),
+  [FilterType.PAST]: (events) => events.filter((event) => isEventPast(event.date)),
 };
 
-export { getRandomElement, getRandomInteger, timeDurationHours, timeDurationMinutes, timeDurationDays, isEventFuture, isEventPresent, isEventPast, filter };
+export { getRandomElement, getRandomInteger, timeDurationHours, timeDurationMinutes, timeDurationDays, isEventFuture, isEventPresent, isEventPast, filter, updateItem };
