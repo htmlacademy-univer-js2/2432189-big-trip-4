@@ -17,8 +17,8 @@ function getOffers(offer) {
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
         <div class="event__available-offers">
             ${Array.from(new Set(offer)).map(([title, price]) => `<div class="event__offer-selector">
-                <input class="event__offer-checkbox  visually-hidden" id="event-offer-train-1" type="checkbox" name="event-offer-train" checked>
-                    <label class="event__offer-label" for="event-offer-train-1">
+                <input class="event__offer-checkbox  visually-hidden" id="event-offer-${title}-1" type="checkbox" name="event-offer-${title}" checked>
+                    <label class="event__offer-label" for="event-offer-${title}-1">
                         <span class="event__offer-title">${title}</span>
                             &plus;&euro;&nbsp;
                         <span class="event__offer-price">${price}</span>

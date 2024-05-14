@@ -23,7 +23,7 @@ function createEventElement(point) {
   const hours = timeDurationHours(date.dateStart, date.dateEnd) === 0 ? '' : `${timeDurationHours(date.dateStart, date.dateEnd)}H`;
   const minutes = timeDurationMinutes(date.dateStart, date.dateEnd) === 0 ? '' : `${timeDurationMinutes(date.dateStart, date.dateEnd)}M`;
 
-  const eventFavorite = isFavorite && true ? 'event__favorite-btn--active' : '';
+  const eventFavorite = isFavorite ? 'event__favorite-btn--active' : '';
 
   return `<li class="trip-events__item">
             <div class="event">
@@ -63,16 +63,27 @@ function createEventElement(point) {
 export default class eventElementView extends AbstractView {
   #point = null;
   #onEditClick = null;
+  #onFavoriteClick = null;
 
-  constructor({point, onEditClick}) {
+  constructor({ point, onEditClick, onFavoriteClick }) {
     super();
     this.#point = point;
     this.#onEditClick = onEditClick;
+    this.#onFavoriteClick = onFavoriteClick;
 
     this.element
       .querySelector('.event__rollup-btn')
       .addEventListener('click', this.#editClcikHandler);
+
+    this.element
+      .querySelector('.event__favorite-btn')
+      .addEventListener('click', this.#favoriteClickHandler);
   }
+
+  #favoriteClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#onFavoriteClick();
+  };
 
   #editClcikHandler = (evt) => {
     evt.preventDefault();

@@ -6,6 +6,7 @@ const BORDER = 5;
 
 function getRandomPoint() {
   const ID = Math.floor(Math.random() * DESTINATION.size);
+  const uniqID = Math.floor(Math.random() * 1000) + ID * 10;
   const offerCount = Math.floor(Math.random() * BORDER + 1);
 
   const PRICE = {
@@ -14,7 +15,7 @@ function getRandomPoint() {
   };
 
   return {
-    id: ID,
+    id: uniqID,
     price: getRandomInteger(PRICE.MIN, PRICE.MAX),
     date: getRandomElement(DATE),
     destination: getRandomDescription(ID),
