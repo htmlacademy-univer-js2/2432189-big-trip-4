@@ -1,10 +1,12 @@
 import AbstractView from '../framework/view/abstract-view';
+import { SortType } from '../const';
 
-function createSortElement() {
+function createSortElement(currentSort) {
   return ` 
     <form class="trip-events__trip-sort  trip-sort" action="#" method="get">
     <div class="trip-sort__item  trip-sort__item--day">
-      <input id="sort-day" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-day">
+      <input id="sort-day" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-day" 
+        data-sort-type="${SortType.DAY}" ${currentSort === SortType.DAY ? 'checked' : ''}>
       <label class="trip-sort__btn" for="sort-day">Day</label>
     </div>
 
@@ -14,12 +16,14 @@ function createSortElement() {
     </div>
 
     <div class="trip-sort__item  trip-sort__item--time">
-      <input id="sort-time" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-time">
+      <input id="sort-time" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-time"
+        data-sort-type="${SortType.TIME}" ${currentSort === SortType.TIME ? 'checked' : ''}>
       <label class="trip-sort__btn" for="sort-time">Time</label>
     </div>
 
     <div class="trip-sort__item  trip-sort__item--price">
-      <input id="sort-price" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-price" checked>
+      <input id="sort-price" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-price"
+        data-sort-type="${SortType.PRICE}" ${currentSort === SortType.PRICE ? 'checked' : ''}>
       <label class="trip-sort__btn" for="sort-price">Price</label>
     </div>
 
@@ -31,7 +35,23 @@ function createSortElement() {
 }
 
 export default class sortElementView extends AbstractView {
+  #currentSort = null;
+  #onSortType = null;
+
+  constructor({ currentSort, onSortTypeChange }) {
+    super();
+    this.#currentSort = currentSort;
+    this.#onSortType = onSortTypeChange;
+
+    this.element.addEventListener('change', this.#sortTypeChangeHandler);
+  }
+
+  #sortTypeChangeHandler = (evt) => {
+    evt.preventDefault();
+    this.#onSortType(evt.target.dataset.sortType);
+  };
+
   get template() {
-    return createSortElement;
+    return createSortElement(this.#currentSort);
   }
 }

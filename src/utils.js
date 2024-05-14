@@ -44,4 +44,31 @@ const filter = {
   [FilterType.PAST]: (events) => events.filter((event) => isEventPast(event.date)),
 };
 
-export { getRandomElement, getRandomInteger, timeDurationHours, timeDurationMinutes, timeDurationDays, isEventFuture, isEventPresent, isEventPast, filter, updateItem };
+function sortPointDay(points) {
+  return points.sort((firstPoint, secondPoint) => new Date(firstPoint.date.dateStart) - new Date(secondPoint.date.dateStart));
+}
+
+function sortPointTime(points) {
+  return points.sort((firstPoint, secondPoint) =>
+    dayjs(firstPoint.date.dateStart).diff(dayjs(firstPoint.date.dateEnd), 'minutes') -
+    dayjs(secondPoint.date.dateStart).diff(dayjs(secondPoint.date.dateEnd), 'minutes'));
+}
+
+function sortPointPrice(points) {
+  return points.sort((firstPoint, secondPoint) => secondPoint.price - firstPoint.price);
+}
+
+export { getRandomElement,
+  getRandomInteger,
+  timeDurationHours,
+  timeDurationMinutes,
+  timeDurationDays,
+  isEventFuture,
+  isEventPresent,
+  isEventPast,
+  filter,
+  updateItem,
+  sortPointDay,
+  sortPointTime,
+  sortPointPrice
+};
