@@ -1,6 +1,8 @@
 import {remove, render, replace} from '../framework/render.js';
 import EventEditView from '../view/event-edit-view.js';
 import EventView from '../view/event-view.js';
+import { OFFER, DESTINATION } from '../const.js';
+import { getRandomDescription } from '../mock/destination.js';
 
 const MODE = {
   DEFAULT: 'DEFAULT',
@@ -41,6 +43,9 @@ export default class PointPresenter {
       point: this.#point,
       onResetClick: this.#onResetClick,
       onSubmiClick: this.#onSubmiClick,
+      onEditCheckedPoint: this.#onEditCheckedPoint,
+      onEditInputDestination: this.#onEditInputDestination,
+      onEditPointType: this.#onEditPointType,
     });
 
     if (!prevPointComponent || !prevPointEditComponent) {
@@ -105,5 +110,37 @@ export default class PointPresenter {
 
   #onFavoriteClick = () => {
     this.#onDataChange({...this.#point, isFavorite: !this.#point.isFavorite});
+  };
+
+  #onEditInputDestination = (currentCity) => {
+    const id = Array.from(DESTINATION.values()).indexOf(currentCity);
+    this.#onDataChange({
+      ...this.#point,
+      city: currentCity,
+      destination: getRandomDescription(id),
+    });
+  };
+
+  #onEditCheckedPoint = (offer, checkedOffer) => {
+    const cleanCheckedOffer = checkedOffer.split('-')[2];
+    const id = offer.findIndex((item) => item[0] === cleanCheckedOffer);
+    offer[id][2] = !offer[id][2];
+    this.#onDataChange({
+      ...this.#point,
+      offer,
+    });
+  };
+
+  #onEditPointType = (typePoint) => {
+    const offer = OFFER.get(typePoint);
+    const newOffer = offer.map((item) => {
+      item[2] = false;
+      return item;
+    });
+    this.#onDataChange({
+      ...this.#point,
+      type: typePoint,
+      offer: newOffer,
+    });
   };
 }

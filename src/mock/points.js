@@ -1,13 +1,10 @@
 import { getRandomElement, getRandomInteger } from '../utils';
 import { DESTINATION, DATE, POINT_TYPES, OFFER } from '../const';
 import { getRandomDescription } from './destination';
-
-const BORDER = 5;
+import { nanoid } from 'nanoid';
 
 function getRandomPoint() {
   const ID = Math.floor(Math.random() * DESTINATION.size);
-  const uniqID = Math.floor(Math.random() * 1000) + ID * 10;
-  const offerCount = Math.floor(Math.random() * BORDER + 1);
 
   const PRICE = {
     MAX: 2500,
@@ -15,12 +12,12 @@ function getRandomPoint() {
   };
 
   return {
-    id: uniqID,
+    id: nanoid(),
     price: getRandomInteger(PRICE.MIN, PRICE.MAX),
     date: getRandomElement(DATE),
     destination: getRandomDescription(ID),
     isFavorite: Math.floor(Math.random() * 2),
-    offer: Array.from({length: offerCount}, () => getRandomElement(OFFER)),
+    offer: OFFER.get(getRandomElement(POINT_TYPES)),
     type: getRandomElement(POINT_TYPES)
   };
 }
