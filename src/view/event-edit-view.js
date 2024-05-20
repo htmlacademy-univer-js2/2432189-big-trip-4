@@ -1,5 +1,6 @@
-import AbstractView from '../framework/view/abstract-view';
+import AbstractStatefulView from '../framework/view/abstract-view';
 import dayjs from 'dayjs';
+import { POINT_TYPES } from '../const';
 
 const BLANK_POINT = {
   id: null,
@@ -11,19 +12,32 @@ const BLANK_POINT = {
   type: null
 };
 
+function getEditPointTTemplate(currentType) {
+  return (
+    `<div class="event__type-list">
+        <fieldset class="event__type-group">
+          <legend class="visually-hidden">Event type</legend>
+          ${POINT_TYPES.reduce((acc, type) => (`${acc}<div class="event__type-item">
+            <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${type === currentType ? 'checked' : ''}>
+            <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type[0].toUpperCase() + type.slice(1)}</label>
+          </div>`), '')}
+        </fieldset>
+      </div>`);
+}
+
 function getOffers(offer) {
   return offer !== null ? (
     `<section class="event__section  event__section--offers">
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
         <div class="event__available-offers">
-            ${Array.from(new Set(offer)).map(([title, price]) => `<div class="event__offer-selector">
-                <input class="event__offer-checkbox  visually-hidden" id="event-offer-${title}-1" type="checkbox" name="event-offer-${title}" checked>
+            ${offer.reduce((acc, [title, price, isChecked]) => (`${acc}<div class="event__offer-selector">
+                <input class="event__offer-checkbox  visually-hidden" id="event-offer-${title}-1" type="checkbox" name="event-offer-${title}" ${isChecked ? 'checked' : ''}>
                     <label class="event__offer-label" for="event-offer-${title}-1">
                         <span class="event__offer-title">${title}</span>
                             &plus;&euro;&nbsp;
                         <span class="event__offer-price">${price}</span>
                     </label>
-            </div>`).join('')}
+            </div>`), '')}
         </div>
     </section>
 `) : '';
@@ -52,6 +66,7 @@ function createEventEditElement(point) {
                   <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
               </label>
               <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+              ${getEditPointTTemplate(type)}
           </div>
 
           <div class="event__field-group  event__field-group--destination">
@@ -62,16 +77,18 @@ function createEventEditElement(point) {
               <datalist id="destination-list-1">
                   <option value="Amsterdam"></option>
                   <option value="Geneva"></option>
-                  <option value="Chamonix"></option>
+                  <option value="Chicago"></option>
+                  <option value="Baku"></option>
+                  <option value="Ekaterinburg"></option>
               </datalist>
           </div>
 
           <div class="event__field-group  event__field-group--time">
               <label class="visually-hidden" for="event-start-time-1">From</label>
-              <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dayjs(date.startTime).format('DD/MM/YY HH:mm')}">
+              <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${date ? dayjs(date.startTime).format('DD/MM/YY HH:mm') : ''}">
               &mdash;
               <label class="visually-hidden" for="event-end-time-1">To</label>
-              <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dayjs(date.endTime).format('DD/MM/YY HH:mm')}">
+              <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${date ? dayjs(date.endTime).format('DD/MM/YY HH:mm') : ''}">
           </div>
 
           <div class="event__field-group  event__field-group--price">
@@ -79,7 +96,7 @@ function createEventEditElement(point) {
                   <span class="visually-hidden">Price</span>
                   &euro;
               </label>
-              <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
+              <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price ? price : ''}">
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -102,17 +119,26 @@ function createEventEditElement(point) {
 </li>`;
 }
 
-export default class eventEditView extends AbstractView {
+export default class eventEditView extends AbstractStatefulView {
   #point = null;
   #onResetClick = null;
   #onSubmiClick = null;
+  #onEditCheckedPoint = null;
+  #onEditInputDestination = null;
+  #onEditPointType = null;
 
-  constructor({point = BLANK_POINT, onResetClick, onSubmiClick}){
+  constructor({point = BLANK_POINT, onResetClick, onSubmiClick, onEditCheckedPoint, onEditInputDestination, onEditPointType}){
     super();
     this.#point = point;
     this.#onResetClick = onResetClick;
     this.#onSubmiClick = onSubmiClick;
+    this.#onEditCheckedPoint = onEditCheckedPoint;
+    this.#onEditInputDestination = onEditInputDestination;
+    this.#onEditPointType = onEditPointType;
+    this._restoreHandlers();
+  }
 
+  _restoreHandlers() {
     this.element
       .querySelector('.event__rollup-btn')
       .addEventListener('click', this.#resetClickHandler);
@@ -120,6 +146,18 @@ export default class eventEditView extends AbstractView {
     this.element
       .querySelector('form')
       .addEventListener('submit', this.#submiClickHandler);
+
+    this.element
+      .querySelector('.event__available-offers')
+      .addEventListener('change', this.#editCheckedPointHandler);
+
+    this.element
+      .querySelector('.event__input--destination')
+      .addEventListener('change', this.#editPointInputHandler);
+
+    this.element
+      .querySelector('.event__type-group')
+      .addEventListener('change', this.#editPointTypeHandler);
   }
 
   #resetClickHandler = (evt) => {
@@ -130,6 +168,21 @@ export default class eventEditView extends AbstractView {
   #submiClickHandler = (evt) => {
     evt.preventDefault();
     this.#onSubmiClick();
+  };
+
+  #editCheckedPointHandler = (evt) => {
+    evt.preventDefault();
+    this.#onEditCheckedPoint(this.#point.offer, evt.currentTarget.attributes[0].ownerDocument.activeElement.id);
+  };
+
+  #editPointInputHandler = (evt) => {
+    evt.preventDefault();
+    this.#onEditInputDestination(evt.currentTarget.value);
+  };
+
+  #editPointTypeHandler = (evt) => {
+    evt.preventDefault();
+    this.#onEditPointType(evt.target.value);
   };
 
   get template() {
