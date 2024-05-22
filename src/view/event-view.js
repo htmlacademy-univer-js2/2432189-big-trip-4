@@ -19,15 +19,15 @@ function createEventElement(point) {
 
   const { city } = destination;
 
-  const days = timeDurationDays(date.dateStart, date.dateEnd) === 0 ? '' : `${timeDurationDays(date.dateStart, date.dateEnd)}D`;
-  const hours = timeDurationHours(date.dateStart, date.dateEnd) === 0 ? '' : `${timeDurationHours(date.dateStart, date.dateEnd)}H`;
-  const minutes = timeDurationMinutes(date.dateStart, date.dateEnd) === 0 ? '' : `${timeDurationMinutes(date.dateStart, date.dateEnd)}M`;
+  const days = timeDurationDays(date.dateStart, date.dateEnd);
+  const hours = timeDurationHours(date.dateStart, date.dateEnd);
+  const minutes = timeDurationMinutes(date.dateStart, date.dateEnd);
 
   const eventFavorite = isFavorite ? 'event__favorite-btn--active' : '';
 
   return `<li class="trip-events__item">
             <div class="event">
-                <time class="event__date" datetime="${date.dateStart}">${dayjs(date.dateStart).format('DD MMM')}</time>
+                <time class="event__date" datetime="${date.dateStart}">${dayjs(date.dateStart).format('MMM DD')}</time>
                 <div class="event__type">
                     <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
                 </div>
