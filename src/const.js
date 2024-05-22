@@ -11,15 +11,15 @@ const POINT_TYPES = [
 ];
 
 const OFFER = new Map([
-  ['taxi', [['Order Uber', 10, true], ['Switch to PREMIUM', 100, true], ['Add luggage', 15, true], ['Child seat', 20, true], ['Wi-Fi', 5, true]]],
+  ['taxi', [['Order Uber', 10, true], ['Switch to PREMIUM', 100, false], ['Add luggage', 15, true], ['Child seat', 20, false], ['Wi-Fi', 5, true]]],
   ['bus', [['Trip with a cat', 45, true], ['Book tickets', 30, true], ['Add luggage', 85, true], ['Reclining seat', 55, true]]],
-  ['train', [['Book tickets', 40, true], ['Add luggage', 25, true], ['Reclining seat', 80, true], ['Wi-Fi', 5, true], ['Meal service', 35, true]]],
+  ['train', [['Book tickets', 40, true], ['Add luggage', 25, true], ['Switch to PREMIUM tickets', 100, false], ['Wi-Fi', 5, true], ['Meal service', 35, true]]],
   ['ship', [['Add luggage', 25, true], ['Book tickets', 100, true], ['Guided tour', 75, true], ['Add breakfast', 120, true]]],
   ['drive', [['Rent a car', 100, true], ['GPS', 20, true], ['Child seat', 30, true], ['Add luggage', 40, true]]],
-  ['flight', [['Reclining seat', 200, true], ['Add luggage', 150, true], ['Add breakfast', 150, true], ['Switch to PREMIUM', 1000]]],
-  ['check-in', [['Book tickets', 45, true], ['Add luggage', 75, true], ['Add breakfast', 110, true], ['Room upgrade', 80, true], ['Switch to PREMIUM', 100]]],
-  ['sightseeing', [['Lunch in city', 150, true], ['Private guide', 300, true], ['Transportation included', 100, true]]],
-  ['restaurant', [['Order baklava', 20], ['Order Pizza', 5], ['Live music', 75, true]]],
+  ['flight', [['Reclining seat', 200, true], ['Add luggage', 150, true], ['Add breakfast', 150, true], ['Switch to PREMIUM', 1000, false], ['Add a transfer', 20, true]]],
+  ['check-in', [['Book tickets', 45, true], ['Add condi', 20, true], ['Wi-Fi', 10, true], ['Add breakfast', 110, true], ['Room upgrade', 80, false], ['Switch to PREMIUM', 100, false]]],
+  ['sightseeing', [['Lunch in city', 150, true], ['Private guide', 300, false], ['Transportation included', 100, true]]],
+  ['restaurant', [['Order baklava', 20, false], ['Order Pizza', 5, true], ['Live music', 75, true]]],
 ]);
 
 const DESTINATION = new Map([

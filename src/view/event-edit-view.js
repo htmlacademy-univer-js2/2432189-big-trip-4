@@ -1,6 +1,9 @@
-import AbstractStatefulView from '../framework/view/abstract-view';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import dayjs from 'dayjs';
-import { POINT_TYPES } from '../const';
+import { POINT_TYPES, OFFER, DESTINATION } from '../const';
+import flatpickr from 'flatpickr';
+import { getRandomDescription } from '../mock/destination';
+import 'flatpickr/dist/flatpickr.min.css';
 
 const BLANK_POINT = {
   id: null,
@@ -85,10 +88,10 @@ function createEventEditElement(point) {
 
           <div class="event__field-group  event__field-group--time">
               <label class="visually-hidden" for="event-start-time-1">From</label>
-              <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${date ? dayjs(date.startTime).format('DD/MM/YY HH:mm') : ''}">
+              <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${date ? dayjs(date.dateStart).format('DD/MM/YY HH:mm') : ''}">
               &mdash;
               <label class="visually-hidden" for="event-end-time-1">To</label>
-              <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${date ? dayjs(date.endTime).format('DD/MM/YY HH:mm') : ''}">
+              <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${date ? dayjs(date.dateEnd).format('DD/MM/YY HH:mm') : ''}">
           </div>
 
           <div class="event__field-group  event__field-group--price">
@@ -120,22 +123,28 @@ function createEventEditElement(point) {
 }
 
 export default class eventEditView extends AbstractStatefulView {
-  #point = null;
+  #initialValueOfPoint = null;
   #onResetClick = null;
   #onSubmiClick = null;
-  #onEditCheckedPoint = null;
-  #onEditInputDestination = null;
-  #onEditPointType = null;
+  #onEditSavePointClick = null;
+  #datepickerStart = null;
+  #datepickerEnd = null;
 
-  constructor({point = BLANK_POINT, onResetClick, onSubmiClick, onEditCheckedPoint, onEditInputDestination, onEditPointType}){
+  constructor({point = BLANK_POINT, onResetClick, onSubmiClick, onEditSavePointClick }){
     super();
-    this.#point = point;
+    this._setState(point);
+    this.#initialValueOfPoint = JSON.parse(JSON.stringify(point));
     this.#onResetClick = onResetClick;
     this.#onSubmiClick = onSubmiClick;
-    this.#onEditCheckedPoint = onEditCheckedPoint;
-    this.#onEditInputDestination = onEditInputDestination;
-    this.#onEditPointType = onEditPointType;
+    this.#onEditSavePointClick = onEditSavePointClick;
+
+    this.#setFlatpickr();
+
     this._restoreHandlers();
+  }
+
+  get template() {
+    return createEventEditElement(this._state);
   }
 
   _restoreHandlers() {
@@ -160,32 +169,118 @@ export default class eventEditView extends AbstractStatefulView {
       .addEventListener('change', this.#editPointTypeHandler);
   }
 
+  #setFlatpickr() {
+    const commonConfig = {
+      enableTime: true,
+      dateFormat: 'd/m/y H:i',
+      'time_24hr': true,
+      locale: {
+        firstDayOfWeek: 1,
+      }
+    };
+
+    this.#datepickerStart = flatpickr(
+      this.element.querySelectorAll('.event__input--time')[0],
+      {
+        ...commonConfig,
+        defaultDate: dayjs(this._state.date.dateStart).format('DD/MM/YY HH:mm'),
+        onClose: this.#editStartDateChangeHandler,
+      }
+    );
+
+    this.#datepickerEnd = flatpickr(
+      this.element.querySelectorAll('.event__input--time')[1],
+      {
+        ...commonConfig,
+        defaultDate: dayjs(this._state.date.dateEnd).format('DD/MM/YY HH:mm'),
+        onClose: this.#editEndDateChangeHandler,
+      }
+    );
+  }
+
+  #editStartDateChangeHandler = ([fullStartDate, fullEndDate]) => {
+    const dateStart = dayjs(fullStartDate).format('YYYY-MM-DDTHH:mm');
+    const dateEnd = dayjs(fullEndDate).format('YYYY-MM-DDTHH:mm');
+
+    this._setState({
+      ...this._state,
+      date: {
+        dateStart,
+        dateEnd
+      }
+    });
+  };
+
+  #editEndDateChangeHandler = ([fullDate]) => {
+    const dateEnd = dayjs(fullDate).format('YYYY-MM-DDTHH:mm');
+    this._setState({
+      ...this._state,
+      date: {
+        dateStart: this._state.date.dateStart,
+        dateEnd
+      }
+    });
+  };
+
+  removeElement() {
+    super.removeElement();
+
+    if (this.#datepickerStart) {
+      this.#datepickerStart.destroy();
+      this.#datepickerStart = null;
+    }
+
+    if (this.#datepickerEnd) {
+      this.#datepickerEnd.destroy();
+      this.#datepickerEnd = null;
+    }
+  }
+
   #resetClickHandler = (evt) => {
     evt.preventDefault();
-    this.#onResetClick();
+    this.#onResetClick(this.#initialValueOfPoint);
   };
 
   #submiClickHandler = (evt) => {
     evt.preventDefault();
+    this.#onEditSavePointClick(this._state);
     this.#onSubmiClick();
   };
 
   #editCheckedPointHandler = (evt) => {
     evt.preventDefault();
-    this.#onEditCheckedPoint(this.#point.offer, evt.currentTarget.attributes[0].ownerDocument.activeElement.id);
+    const offer = this._state.offer;
+    const checkedOffer = evt.currentTarget.attributes[0].ownerDocument.activeElement.id;
+    const cleanCheckedOffer = checkedOffer.split('-')[2];
+    const id = offer.findIndex((item) => item[0] === cleanCheckedOffer);
+    offer[id][2] = !offer[id][2];
+    this._setState({
+      ...this._state,
+      offer,
+    });
   };
 
   #editPointInputHandler = (evt) => {
     evt.preventDefault();
-    this.#onEditInputDestination(evt.currentTarget.value);
+    const currentCity = evt.currentTarget.value;
+    const id = Array.from(DESTINATION.values()).indexOf(currentCity);
+    this.updateElement({
+      city: currentCity,
+      destination: getRandomDescription(id),
+    });
   };
 
   #editPointTypeHandler = (evt) => {
     evt.preventDefault();
-    this.#onEditPointType(evt.target.value);
+    const typePoint = evt.target.value;
+    const offer = OFFER.get(typePoint);
+    const newOffer = offer.map((item) => {
+      item[2] = false;
+      return item;
+    });
+    this.updateElement({
+      type: typePoint,
+      offer: newOffer,
+    });
   };
-
-  get template() {
-    return createEventEditElement(this.#point);
-  }
 }

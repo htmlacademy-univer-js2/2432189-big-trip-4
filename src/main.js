@@ -17,7 +17,7 @@ const boardPresenter = new BoardPresenter({
 
 const filters = generateFilter(pointsModel.points);
 
-render(new TripInfoView(), siteMainContainer, RenderPosition.AFTERBEGIN);
+render(new TripInfoView(pointsModel.points), siteMainContainer, RenderPosition.AFTERBEGIN);
 render(new FilterView({filters}), filterContainer);
 
 boardPresenter.init();

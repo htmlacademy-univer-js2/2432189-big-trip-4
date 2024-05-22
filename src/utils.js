@@ -10,15 +10,18 @@ function getRandomInteger(start, end) {
 }
 
 function timeDurationDays(start, end) {
-  return dayjs(end).diff(start, 'day');
+  const days = dayjs(end).diff(dayjs(start), 'day');
+  return days !== 0 ? `${days}D` : '';
 }
 
 function timeDurationHours(start, end) {
-  return dayjs(end).diff(start, 'hour') % 24;
+  const hours = dayjs(end).diff(dayjs(start), 'hour') % 24;
+  return hours !== 0 ? `${hours}H` : '';
 }
 
 function timeDurationMinutes(start, end) {
-  return dayjs(end).diff(start, 'minute') % 60;
+  const minutes = dayjs(end).diff(dayjs(start), 'minute') % 60;
+  return minutes !== 0 ? `${minutes}M` : '';
 }
 
 function isEventFuture(dueDate) {
