@@ -4,6 +4,7 @@ import { POINT_TYPES, OFFER, DESTINATION } from '../const';
 import flatpickr from 'flatpickr';
 import { getRandomDescription } from '../mock/destination';
 import 'flatpickr/dist/flatpickr.min.css';
+import he from 'he';
 
 const BLANK_POINT = {
   id: null,
@@ -76,7 +77,7 @@ function createEventEditElement(point) {
               <label class="event__label  event__type-output" for="event-destination-1">
                   ${type}
               </label>
-              <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${city}" list="destination-list-1">
+              <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(city)}" list="destination-list-1">
               <datalist id="destination-list-1">
                   <option value="Amsterdam"></option>
                   <option value="Geneva"></option>
@@ -99,7 +100,7 @@ function createEventEditElement(point) {
                   <span class="visually-hidden">Price</span>
                   &euro;
               </label>
-              <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price ? price : ''}">
+              <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price ? he.encode(String(price)) : ''}">
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -127,16 +128,18 @@ export default class eventEditView extends AbstractStatefulView {
   #onResetClick = null;
   #onSubmiClick = null;
   #onEditSavePointClick = null;
+  #handleDeleteClick = null;
   #datepickerStart = null;
   #datepickerEnd = null;
 
-  constructor({point = BLANK_POINT, onResetClick, onSubmiClick, onEditSavePointClick }){
+  constructor({point = BLANK_POINT, onResetClick, onSubmiClick, onEditSavePointClick, onDeleteClick }){
     super();
     this._setState(point);
     this.#initialValueOfPoint = JSON.parse(JSON.stringify(point));
     this.#onResetClick = onResetClick;
     this.#onSubmiClick = onSubmiClick;
     this.#onEditSavePointClick = onEditSavePointClick;
+    this.#handleDeleteClick = onDeleteClick;
 
     this.#setFlatpickr();
 
@@ -167,6 +170,9 @@ export default class eventEditView extends AbstractStatefulView {
     this.element
       .querySelector('.event__type-group')
       .addEventListener('change', this.#editPointTypeHandler);
+    this.element
+      .querySelector('.event__reset-btn')
+      .addEventListener('click', this.#editDeletePointHandler);
   }
 
   #setFlatpickr() {
@@ -197,6 +203,11 @@ export default class eventEditView extends AbstractStatefulView {
       }
     );
   }
+
+  #editDeletePointHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleDeleteClick(this._state);
+  };
 
   #editStartDateChangeHandler = ([fullStartDate, fullEndDate]) => {
     const dateStart = dayjs(fullStartDate).format('YYYY-MM-DDTHH:mm');

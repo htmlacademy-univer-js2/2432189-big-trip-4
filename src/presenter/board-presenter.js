@@ -1,106 +1,167 @@
-import { RenderPosition, render } from '../framework/render.js';
+import { RenderPosition, render, remove } from '../framework/render.js';
 import EventsListView from '../view/events-list-view.js';
 import SortView from '../view/sort-view.js';
 import EventEmptyElement from '../view/event-list-empty-view.js';
 import PointPresenter from './point-presenter.js';
-import { updateItem, sortPointDay, sortPointPrice, sortPointTime } from '../utils.js';
-import { SortType } from '../const.js';
-
+import NewPointPresenter from './new-point-presenter.js';
+import { sortPointDay, sortPointPrice, sortPointTime } from '../utils.js';
+import { SortType, UserAction, UpdateType, FilterType } from '../const.js';
+import { filter } from '../utils.js';
 
 export default class BoardPresenter {
-  #ponintListComponent = new EventsListView();
+  #pointListComponent = new EventsListView();
   #container = null;
   #pointsModel = null;
-  #sortComponent;
-  #noTaskComponent = new EventEmptyElement();
+  #filterModel = null;
+  #sortComponent = null;
+  #noTaskComponent = null;
   #pointPresenters = new Map();
+  #newPointPresenter = null;
   #currentSort = SortType.DAY;
+  #filterType = FilterType.EVERYTHING;
 
-  #boardPoints = [];
-
-  constructor({ container, pointsModel }) {
+  constructor({ container, pointsModel, filterModel, onNewPointDestroy }) {
     this.#container = container;
     this.#pointsModel = pointsModel;
+    this.#filterModel = filterModel;
+
+    this.#newPointPresenter = new NewPointPresenter({
+      pointsListContainer: this.#pointListComponent.element,
+      onDataChange: this.#handleViewAction,
+      onDestroy: onNewPointDestroy
+    });
+
+    this.#pointsModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
+  }
+
+  get points() {
+    this.#filterType = this.#filterModel.filter;
+    const points = this.#pointsModel.points;
+    const filteredPoints = filter[this.#filterType](points);
+
+    switch (this.#currentSort) {
+      case SortType.DAY:
+        return sortPointDay([...filteredPoints]);
+      case SortType.PRICE:
+        return sortPointPrice([...filteredPoints]);
+      case SortType.TIME:
+        return sortPointTime([...filteredPoints]);
+    }
+    return filteredPoints;
   }
 
   init() {
     this.#renderBoard();
   }
 
-  #renderBoard() {
-    this.#boardPoints = sortPointDay([...this.#pointsModel.points]);
-
-    if (this.#boardPoints.length === 0) {
-      this.#renderEmptyElement();
-      return;
-    }
-
-    this.#renderSort();
-    render(this.#ponintListComponent, this.#container);
-    this.#boardPoints.forEach((point) => this.#renderPoints(point));
+  createTask() {
+    this.#currentSort = SortType.DAY;
+    this.#filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this.#newPointPresenter.init();
   }
 
-  #onDataChange = (updatedPoint) => {
-    this.#boardPoints = updateItem(this.#boardPoints, updatedPoint);
-    this.#pointPresenters.get(updatedPoint.id).init(updatedPoint);
+  #handleModeChange = () => {
+    this.#newPointPresenter.destroy();
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+  };
+
+  #handleViewAction = (actionType, updateType, update) => {
+    switch (actionType) {
+      case UserAction.UPDATE_TASK:
+        this.#pointsModel.updatePoint(updateType, update);
+        break;
+      case UserAction.ADD_TASK:
+        this.#pointsModel.addPoint(updateType, update);
+        break;
+      case UserAction.DELETE_TASK:
+        this.#pointsModel.deletePoint(updateType, update);
+        break;
+    }
+  };
+
+  #handleModelEvent = (updateType, data) => {
+    switch (updateType) {
+      case UpdateType.PATCH:
+        this.#pointPresenters.get(data.id).init(data);
+        break;
+      case UpdateType.MINOR:
+        this.#clearBoard();
+        this.#renderBoard();
+        break;
+      case UpdateType.MAJOR:
+        this.#clearBoard({ resetSortType: true });
+        this.#renderBoard();
+        break;
+    }
+  };
+
+  #handleSortTypeChange = (sortType) => {
+    if (this.#currentSort === sortType) {
+      return;
+    }
+    this.#currentSort = sortType;
+    this.#clearBoard();
+    this.#renderBoard();
   };
 
   #renderSort() {
+    if (this.#sortComponent !== null && this.#sortComponent instanceof SortView) {
+      remove(this.#sortComponent);
+    }
     this.#sortComponent = new SortView({
       currentSort: this.#currentSort,
-      onSortTypeChange: this.#onSortTypeChange,
+      onSortTypeChange: this.#handleSortTypeChange,
     });
     render(this.#sortComponent, this.#container, RenderPosition.AFTERBEGIN);
   }
 
-  #onSortTypeChange = (sortType) => {
-    if (this.#currentSort === sortType) {
-      return;
-    }
-
-    this.#sortPoints(sortType);
-
-    this.#clearPointsList();
-    this.#boardPoints.forEach((point) => this.#renderPoints(point));
-  };
-
-  #sortPoints = (sortType) => {
-    switch(sortType) {
-      case SortType.DAY:
-        this.#boardPoints = sortPointDay([...this.#boardPoints]);
-        break;
-      case SortType.TIME:
-        this.#boardPoints = sortPointTime([...this.#boardPoints]);
-        break;
-      case SortType.PRICE:
-        this.#boardPoints = sortPointPrice([...this.#boardPoints]);
-        break;
-    }
-
-    this.#currentSort = sortType;
-  };
-
-  #clearPointsList = () => {
-    this.#pointPresenters.forEach((presenter) => presenter.destroy());
-    this.#pointPresenters.clear();
-  };
-
-
-  #renderEmptyElement() {
-    render(this.#noTaskComponent, this.#container);
+  #renderPoints(points) {
+    points.forEach((point) => this.#renderPoint(point));
   }
 
-  #renderPoints(point) {
+  #renderPoint(point) {
     const pointPresenter = new PointPresenter({
-      pointListContainer: this.#ponintListComponent.element,
-      onDataChange: this.#onDataChange,
-      onModeChange: this.#onModeChange,
+      pointListContainer: this.#pointListComponent.element,
+      onDataChange: this.#handleViewAction,
+      onModeChange: this.#handleModeChange,
     });
     pointPresenter.init(point);
     this.#pointPresenters.set(point.id, pointPresenter);
   }
 
-  #onModeChange = () => {
-    this.#pointPresenters.forEach((presenter) => presenter.resetView());
-  };
+  #renderEmptyElement() {
+    this.#noTaskComponent = new EventEmptyElement({
+      filterType: this.#filterType
+    });
+    render(this.#noTaskComponent, this.#container);
+  }
+
+  #clearBoard({ resetSortType = false } = {}) {
+    this.#pointPresenters.forEach((presenter) => presenter.destroy());
+    this.#pointPresenters.clear();
+    this.#newPointPresenter.destroy();
+    remove(this.#sortComponent);
+    remove(this.#noTaskComponent);
+
+    if (resetSortType) {
+      this.#currentSort = SortType.DAY;
+    }
+  }
+
+  #renderBoard() {
+    render(this.#pointListComponent, this.#container);
+
+    const points = this.points;
+    const pointCount = points.length;
+
+    if (pointCount === 0) {
+      this.#renderEmptyElement();
+      return;
+    }
+
+    this.#renderSort();
+    render(this.#pointListComponent, this.#container);
+    this.#renderPoints(points);
+  }
 }

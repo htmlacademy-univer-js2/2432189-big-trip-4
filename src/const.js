@@ -82,4 +82,17 @@ const SortType = {
   PRICE: 'price',
 };
 
-export { POINT_TYPES, DATE, DESTINATION, OFFER, DESCRIPTION, FilterType, SortType };
+const UserAction = {
+  UPDATE_TASK: 'UPDATE_TASK',
+  ADD_TASK: 'ADD_TASK',
+  DELETE_TASK: 'DELETE_TASK',
+};
+
+const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
+};
+
+
+export { POINT_TYPES, DATE, DESTINATION, OFFER, DESCRIPTION, FilterType, SortType, UserAction, UpdateType };
