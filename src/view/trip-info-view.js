@@ -8,23 +8,23 @@ function createTripInfoElement(points) {
   const endDate = dayjs(points[points.length - 1].date.dateEnd).format('MMM D');
 
   return `
-  <section class="trip-main__trip-info  trip-info">
-    <div class="trip-info__main">
-      <h1 class="trip-info__title">${destinations}</h1>
+      <section class="trip-main__trip-info  trip-info">
+        <div class="trip-info__main">
+          <h1 class="trip-info__title">${destinations}</h1>
 
-      <p class="trip-info__dates">${startDate}&nbsp;&mdash;&nbsp;${endDate}</p>
-    </div>
+          <p class="trip-info__dates">${startDate}&nbsp;&mdash;&nbsp;${endDate}</p>
+        </div>
 
-    <p class="trip-info__cost">
-      Total: &euro;&nbsp;<span class="trip-info__cost-value">${cost}</span>
-    </p>
-  </section>`;
+        <p class="trip-info__cost">
+          Total: &euro;&nbsp;<span class="trip-info__cost-value">${cost}</span>
+        </p>
+      </section>`;
 }
 
 export default class TripInfoView extends AbstractView {
   #points = null;
 
-  constructor(points) {
+  constructor(points, ) {
     super();
     this.#points = points;
   }

@@ -36,10 +36,6 @@ function isEventPast(dueDate) {
   return dueDate.dateEnd && dayjs().isAfter(dueDate.dateEnd, 'D');
 }
 
-function updateItem(items, update) {
-  return items.map((item) => item.id === update.id ? update : item);
-}
-
 const filter = {
   [FilterType.EVERYTHING]: (events) => [...events],
   [FilterType.FUTURE]: (events) => events.filter((event) => isEventFuture(event.date)),
@@ -70,7 +66,6 @@ export { getRandomElement,
   isEventPresent,
   isEventPast,
   filter,
-  updateItem,
   sortPointDay,
   sortPointTime,
   sortPointPrice

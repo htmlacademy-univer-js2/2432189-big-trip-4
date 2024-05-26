@@ -1,6 +1,8 @@
-import {remove, render, replace} from '../framework/render.js';
+import { remove, render, replace } from '../framework/render.js';
 import EventEditView from '../view/event-edit-view.js';
 import EventView from '../view/event-view.js';
+import { UserAction, UpdateType } from '../const.js';
+import dayjs from 'dayjs';
 
 
 const MODE = {
@@ -43,6 +45,7 @@ export default class PointPresenter {
       onResetClick: this.#onResetClick,
       onSubmiClick: this.#onSubmiClick,
       onEditSavePointClick: this.#onEditSavePointClick,
+      onDeleteClick: this.#handleDeleteClick,
     });
 
     if (!prevPointComponent || !prevPointEditComponent) {
@@ -97,8 +100,25 @@ export default class PointPresenter {
     this.#replacePointToForm();
   };
 
-  #onSubmiClick = () => {
+  #onSubmiClick = (update) => {
+    const isMinorUpdate = dayjs(update.start).isSame(this.#point.start)
+    || dayjs(update.end).isSame(this.#point.end)
+    || update.price === this.#point.price;
+
+    this.#onDataChange(
+      UserAction.UPDATE_TASK,
+      isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
+      update,
+    );
     this.#replaceFormToPoint();
+  };
+
+  #handleDeleteClick = (task) => {
+    this.#onDataChange(
+      UserAction.DELETE_TASK,
+      UpdateType.MINOR,
+      task,
+    );
   };
 
   #onResetClick = (point) => {
@@ -107,12 +127,17 @@ export default class PointPresenter {
   };
 
   #onFavoriteClick = () => {
-    this.#onDataChange({...this.#point, isFavorite: !this.#point.isFavorite});
+    this.#onDataChange(
+      UserAction.UPDATE_TASK,
+      UpdateType.PATCH,
+      {...this.#point, isFavorite: !this.#point.isFavorite});
   };
 
   #onEditSavePointClick = (point) => {
-    this.#onDataChange({
-      ...point,
-    });
+    this.#onDataChange(
+      UserAction.UPDATE_TASK,
+      UpdateType.MINOR,
+      point
+    );
   };
 }
