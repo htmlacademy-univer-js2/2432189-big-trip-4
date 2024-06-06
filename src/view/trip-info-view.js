@@ -1,16 +1,16 @@
 import AbstractView from '../framework/view/abstract-view';
 import dayjs from 'dayjs';
 
-function createTripInfoElement(points) {
-  const cost = points.reduce((summary, point) => summary + point.price, 0);
-  const destinations = points.map((point) => point.destination.city).join(' &mdash; ');
-  const startDate = dayjs(points[0].date.dateStart).format('MMM D');
-  const endDate = dayjs(points[points.length - 1].date.dateEnd).format('MMM D');
+function createTripInfoElement(points, destinations) {
+  const cost = points.reduce((summary, point) => summary + point.basePrice, 0);
+  const destination = destinations.map((dest) => dest.name).join(' &mdash; ');
+  const startDate = dayjs(points[0].dateFrom).format('MMM D');
+  const endDate = dayjs(points[points.length - 1].dateTo).format('MMM D');
 
   return `
       <section class="trip-main__trip-info  trip-info">
         <div class="trip-info__main">
-          <h1 class="trip-info__title">${destinations}</h1>
+          <h1 class="trip-info__title">${destination}</h1>
 
           <p class="trip-info__dates">${startDate}&nbsp;&mdash;&nbsp;${endDate}</p>
         </div>
@@ -23,13 +23,15 @@ function createTripInfoElement(points) {
 
 export default class TripInfoView extends AbstractView {
   #points = null;
+  #destinations = null;
 
-  constructor(points, ) {
+  constructor(points, destinations) {
     super();
     this.#points = points;
+    this.#destinations = destinations;
   }
 
   get template() {
-    return createTripInfoElement(this.#points);
+    return createTripInfoElement(this.#points, this.#destinations);
   }
 }

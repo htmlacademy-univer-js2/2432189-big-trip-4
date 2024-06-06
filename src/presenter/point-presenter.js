@@ -28,7 +28,7 @@ export default class PointPresenter {
     this.#onModeChange = onModeChange;
   }
 
-  init(point) {
+  init(point, offers, destinations) {
     this.#point = point;
 
     const prevPointComponent = this.#componentEvent;
@@ -36,15 +36,18 @@ export default class PointPresenter {
 
     this.#componentEvent = new EventView({
       point: this.#point,
+      offers,
+      destinations,
       onEditClick: this.#onEditClick,
       onFavoriteClick: this.#onFavoriteClick,
     });
 
     this.#componentEventEdit = new EventEditView({
       point: this.#point,
+      offers,
+      destinations,
       onResetClick: this.#onResetClick,
-      onSubmiClick: this.#onSubmiClick,
-      onEditSavePointClick: this.#onEditSavePointClick,
+      onSubmitClick: this.#onSubmitClick,
       onDeleteClick: this.#handleDeleteClick,
     });
 
@@ -100,9 +103,9 @@ export default class PointPresenter {
     this.#replacePointToForm();
   };
 
-  #onSubmiClick = (update) => {
-    const isMinorUpdate = dayjs(update.start).isSame(this.#point.start)
-    || dayjs(update.end).isSame(this.#point.end)
+  #onSubmitClick = (update) => {
+    const isMinorUpdate = dayjs(update.dateFrom).isSame(this.#point.dateFrom)
+    || dayjs(update.dateTo).isSame(this.#point.dateTo)
     || update.price === this.#point.price;
 
     this.#onDataChange(
@@ -123,7 +126,7 @@ export default class PointPresenter {
 
   #onResetClick = (point) => {
     this.#replaceFormToPoint();
-    this.#onEditSavePointClick(point);
+    this.#onSubmitClick(point);
   };
 
   #onFavoriteClick = () => {
@@ -131,13 +134,5 @@ export default class PointPresenter {
       UserAction.UPDATE_TASK,
       UpdateType.PATCH,
       {...this.#point, isFavorite: !this.#point.isFavorite});
-  };
-
-  #onEditSavePointClick = (point) => {
-    this.#onDataChange(
-      UserAction.UPDATE_TASK,
-      UpdateType.MINOR,
-      point
-    );
   };
 }

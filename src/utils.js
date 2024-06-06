@@ -1,39 +1,31 @@
 import dayjs from 'dayjs';
 import { FilterType } from './const';
 
-function getRandomElement(items) {
-  return items[Math.floor(Math.random() * items.length)];
-}
-
-function getRandomInteger(start, end) {
-  return Math.floor(Math.random() * (end - start + 1) + start);
-}
-
-function timeDurationDays(start, end) {
-  const days = dayjs(end).diff(dayjs(start), 'day');
+function timeDurationDays(dateFrom, dateTo) {
+  const days = dayjs(dateTo).diff(dayjs(dateFrom), 'day');
   return days !== 0 ? `${days}D` : '';
 }
 
-function timeDurationHours(start, end) {
-  const hours = dayjs(end).diff(dayjs(start), 'hour') % 24;
+function timeDurationHours(dateFrom, dateTo) {
+  const hours = dayjs(dateTo).diff(dayjs(dateFrom), 'hour') % 24;
   return hours !== 0 ? `${hours}H` : '';
 }
 
-function timeDurationMinutes(start, end) {
-  const minutes = dayjs(end).diff(dayjs(start), 'minute') % 60;
+function timeDurationMinutes(dateFrom, dateTo) {
+  const minutes = dayjs(dateTo).diff(dayjs(dateFrom), 'minute') % 60;
   return minutes !== 0 ? `${minutes}M` : '';
 }
 
-function isEventFuture(dueDate) {
-  return dueDate.dateStart && dayjs().isBefore(dueDate.dateStart, 'D');
+function isEventFuture(dateFrom) {
+  return dateFrom && dayjs().isBefore(dateFrom, 'D');
 }
 
-function isEventPresent(dueDate) {
-  return dueDate.dateStart && dueDate.dateEnd && dayjs(dueDate.dateStart).isSame(dayjs(), 'D');
+function isEventPresent(dateFrom, dateTo) {
+  return dateFrom && dateTo && dayjs(dateFrom).isSame(dayjs(), 'D');
 }
 
-function isEventPast(dueDate) {
-  return dueDate.dateEnd && dayjs().isAfter(dueDate.dateEnd, 'D');
+function isEventPast(dateTo) {
+  return dateTo && dayjs().isAfter(dateTo, 'D');
 }
 
 const filter = {
@@ -44,21 +36,20 @@ const filter = {
 };
 
 function sortPointDay(points) {
-  return points.sort((firstPoint, secondPoint) => new Date(firstPoint.date.dateStart) - new Date(secondPoint.date.dateStart));
+  return points.sort((firstPoint, secondPoint) => new Date(firstPoint.dateFrom) - new Date(secondPoint.dateTo));
 }
 
 function sortPointTime(points) {
   return points.sort((firstPoint, secondPoint) =>
-    dayjs(firstPoint.date.dateStart).diff(dayjs(firstPoint.date.dateEnd), 'minutes') -
-    dayjs(secondPoint.date.dateStart).diff(dayjs(secondPoint.date.dateEnd), 'minutes'));
+    dayjs(firstPoint.dateFrom).diff(dayjs(firstPoint.dateTo), 'minutes') -
+    dayjs(secondPoint.dateFrom).diff(dayjs(secondPoint.dateTo), 'minutes'));
 }
 
 function sortPointPrice(points) {
   return points.sort((firstPoint, secondPoint) => secondPoint.price - firstPoint.price);
 }
 
-export { getRandomElement,
-  getRandomInteger,
+export {
   timeDurationHours,
   timeDurationMinutes,
   timeDurationDays,
