@@ -2,50 +2,53 @@ import dayjs from 'dayjs';
 import AbstractView from '../framework/view/abstract-view';
 import { timeDurationDays, timeDurationHours, timeDurationMinutes } from '../utils';
 
-function createNewPointOfferTemplate(offer) {
+function createNewPointOfferTemplate(offers, currentOffers) {
   return (
     `<ul class="event__selected-offers">
-          ${Array.from(new Set(offer)).map(([title, price]) => `<li class="event__offer">
-              <span class="event__offer-title">${title}</span>
-                  &plus;&euro;&nbsp;
-              <span class="event__offer-price">${price}</span>
-          </li>`).join('')}
-      </ul>`
+    ${currentOffers.reduce((acc, { id, title, price }) =>
+      (acc += offers.includes(id) ? `<li class="event__offer">
+      <span class="event__offer-title">${title}</span>
+        &plus;&euro;&nbsp;
+      <span class="event__offer-price">${price}</span>
+    </li>` : ''), '')}
+  </ul>`
   );
 }
 
-function createEventElement(point) {
-  const { type, price, date, destination, offer, isFavorite } = point;
+function createEventElement(point, allOffers, destinations) {
+  const { type, basePrice, dateFrom, dateTo, destination, offers, isFavorite } = point;
+  const currentOffers = allOffers.find((offer) => offer.type === type).offers;
 
-  const { city } = destination;
+  const currentDestination = destinations.find((dest) => dest.id === destination);
+  const { name } = currentDestination;
 
-  const days = timeDurationDays(date.dateStart, date.dateEnd);
-  const hours = timeDurationHours(date.dateStart, date.dateEnd);
-  const minutes = timeDurationMinutes(date.dateStart, date.dateEnd);
+  const days = timeDurationDays(dateFrom, dateTo);
+  const hours = timeDurationHours(dateFrom, dateTo);
+  const minutes = timeDurationMinutes(dateFrom, dateTo);
 
   const eventFavorite = isFavorite ? 'event__favorite-btn--active' : '';
 
   return `<li class="trip-events__item">
             <div class="event">
-                <time class="event__date" datetime="${date.dateStart}">${dayjs(date.dateStart).format('MMM DD')}</time>
+                <time class="event__date" datetime="${dateFrom}">${dayjs(dateFrom).format('MMM DD')}</time>
                 <div class="event__type">
                     <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
                 </div>
-                <h3 class="event__title">${type} ${city}</h3>
+                <h3 class="event__title">${type} ${name}</h3>
                 <div class="event__schedule">
                     <p class="event__time">
-                        <time class="event__start-time" datetime="${date.dateStart}">${dayjs(date.dateStart).format('HH:mm')}</time>
+                        <time class="event__start-time" datetime="${dateFrom}">${dayjs(dateFrom).format('HH:mm')}</time>
                         &mdash;
-                        <time class="event__end-time" datetime="${date.dateStart}">${dayjs(date.dateEnd).format('HH:mm')}</time>
+                        <time class="event__end-time" datetime="${dateTo}">${dayjs(dateTo).format('HH:mm')}</time>
                     </p>
                     <p class="event__duration">${days} ${hours} ${minutes}</p>
                 </div>
                 <p class="event__price">
-                    &euro;&nbsp;<span class="event__price-value">${price}</span>
+                    &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
                 </p>
                 <h4 class="visually-hidden">Offers:</h4>
 
-                ${createNewPointOfferTemplate(offer)}
+                ${createNewPointOfferTemplate(offers, currentOffers)}
 
                 <button class="event__favorite-btn ${eventFavorite}" type="button">
                     <span class="visually-hidden">Add to favorite</span>
@@ -64,12 +67,16 @@ export default class eventElementView extends AbstractView {
   #point = null;
   #onEditClick = null;
   #onFavoriteClick = null;
+  #offers = null;
+  #destinations = null;
 
-  constructor({ point, onEditClick, onFavoriteClick }) {
+  constructor({ point, offers, destinations, onEditClick, onFavoriteClick }) {
     super();
     this.#point = point;
     this.#onEditClick = onEditClick;
     this.#onFavoriteClick = onFavoriteClick;
+    this.#offers = offers;
+    this.#destinations = destinations;
 
     this.element
       .querySelector('.event__rollup-btn')
@@ -91,6 +98,6 @@ export default class eventElementView extends AbstractView {
   };
 
   get template() {
-    return createEventElement(this.#point);
+    return createEventElement(this.#point, this.#offers, this.#destinations);
   }
 }

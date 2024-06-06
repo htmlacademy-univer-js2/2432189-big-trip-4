@@ -16,14 +16,17 @@ export default class NewPointPresenter {
     this.#handleDestroy = onDestroy;
   }
 
-  init() {
+  init(offers, destinations) {
     if (this.#pointEditComponent !== null) {
       return;
     }
 
     this.#pointEditComponent = new EventEditView({
-      onFormSubmit: this.#handleFormSubmit,
-      onDeleteClick: this.#handleDeleteClick
+      onSubmitClick: this.#handleFormSubmit,
+      onDeleteClick: this.#handleDeleteClick,
+      isCreating: true,
+      offers,
+      destinations
     });
 
     render(this.#pointEditComponent, this.#pointsListContainer, RenderPosition.AFTERBEGIN);
