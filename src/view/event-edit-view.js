@@ -18,14 +18,14 @@ function getEditPointTTemplate(currentType) {
       </div>`);
 }
 
-function getOffers(offers, currentOffers) {
+function getOffers(offers, currentOffers, isDisabled) {
   return currentOffers.length !== 0 ? (
     `<section class="event__section  event__section--offers">
     <h3 class="event__section-title  event__section-title--offers">Offers</h3>
     <div class="event__available-offers">
       ${currentOffers.reduce((acc, { id, title, price }) => (`${acc}<div class="event__offer-selector">
         <input class="event__offer-checkbox visually-hidden" id="${title}" type="checkbox" 
-          name="event-offer-${title}" ${offers.includes(id) ? 'checked' : ''}>
+          name="event-offer-${title}" ${offers.includes(id) ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
         <label class="event__offer-label" for="${title}">
           <span class="event__offer-title">${title}</span>
             &plus;&euro;&nbsp;
@@ -38,7 +38,7 @@ function getOffers(offers, currentOffers) {
 }
 
 function getPhotos(pictures){
-  return pictures !== null ? (
+  return pictures.length !== 0 ? (
     `<div class="event__photos-container">
         <div class="event__photos-tape">
             ${pictures.map(({src}) => `<img class="event__photo" src="${src}" alt="Event photo">`)}
@@ -53,12 +53,33 @@ function getCityNames(destinations){
   </datalist>`;
 }
 
-function createEventEditElement(point, isCreating, allOffers, destinations) {
+function getDeleting(isCreating, isDeleting){
+  const deleteText = isDeleting ? 'Deleting' : 'Delete';
+  return `<button class="event__reset-btn" type="reset">${isCreating ? 'Cancel' : deleteText}</button>`;
+}
+
+function getDescription(description){
+  return description ? `<section class="event__section  event__section--destination">
+              <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+              <p class="event__destination-description">${description}</p>
+          </section>` : '';
+}
+
+function getDetails(offers, currentOffers, isDisabled, description, pictures) {
+  return currentOffers.length !== 0 || description || pictures.length !== 0 ? `<section class="event__details">
+          ${getOffers(offers, currentOffers, isDisabled)} 
+          ${getDescription(description)}
+          ${getPhotos(pictures)}
+      </section>` : '';
+}
+
+function createEventEditElement(point, isCreating, allOffers, destinations, isDisabled, isSaving, isDeleting) {
   const { type, basePrice, dateFrom, dateTo, destination, offers } = point;
   const currentOffers = allOffers.find((offer) => offer.type === type).offers;
 
   const currentDestination = destinations.find((dest) => dest.id === destination);
-  let name, description, pictures = null;
+  let name, description = null;
+  let pictures = [];
   if (currentDestination) {
     name = currentDestination.name;
     description = currentDestination.description;
@@ -73,7 +94,7 @@ function createEventEditElement(point, isCreating, allOffers, destinations) {
                   <span class="visually-hidden">Choose event type</span>
                   <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
               </label>
-              <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+              <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox" ${isDisabled ? 'disabled' : ''}>
               ${getEditPointTTemplate(type)}
           </div>
 
@@ -81,16 +102,16 @@ function createEventEditElement(point, isCreating, allOffers, destinations) {
               <label class="event__label  event__type-output" for="event-destination-1">
                   ${type}
               </label>
-              <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${name ? name : ''}" list="destination-list-1">
+              <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${name ? he.encode(name) : ''}" list="destination-list-1" ${isDisabled ? 'disabled' : ''}>
               ${getCityNames(destinations)}
           </div>
 
           <div class="event__field-group  event__field-group--time">
               <label class="visually-hidden" for="event-start-time-1">From</label>
-              <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateFrom ? dayjs(dateFrom).format('DD/MM/YY HH:mm') : ''}">
+              <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dateFrom ? dayjs(dateFrom).format('DD/MM/YY HH:mm') : ''}" ${isDisabled ? 'disabled' : ''}>
               &mdash;
               <label class="visually-hidden" for="event-end-time-1">To</label>
-              <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateTo ? dayjs(dateTo).format('DD/MM/YY HH:mm') : ''}">
+              <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dateTo ? dayjs(dateTo).format('DD/MM/YY HH:mm') : ''}" ${isDisabled ? 'disabled' : ''}>
           </div>
 
           <div class="event__field-group  event__field-group--price">
@@ -98,25 +119,16 @@ function createEventEditElement(point, isCreating, allOffers, destinations) {
                   <span class="visually-hidden">Price</span>
                   &euro;
               </label>
-              <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice ? (String(basePrice)) : ''}">
+              <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice ? he.encode(String(basePrice)) : ''}" ${isDisabled ? 'disabled' : ''}>
           </div>
 
-          <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-          <button class="event__reset-btn" type="reset">${isCreating ? 'Cancel' : 'Delete'}</button>
+          <button class="event__save-btn  btn  btn--blue" type="submit">${isSaving ? 'Saving' : 'Save'}</button>
+          ${getDeleting(isCreating, isDeleting)}
           ${!isCreating ? '<button class="event__rollup-btn" type="button">\
               <span class="visually-hidden">Open event</span>\
           </button>' : ''}
       </header>
-      <section class="event__details">
-          ${getOffers(offers, currentOffers)}
-
-          <section class="event__section  event__section--destination">
-              <h3 class="event__section-title  event__section-title--destination">${description ? 'Destination' : ''}</h3>
-              <p class="event__destination-description">${description}</p>
-          </section>
-
-          ${getPhotos(pictures)}
-      </section>
+      ${getDetails(offers, currentOffers, isDisabled, description, pictures)}
   </form>
 </li>`;
 }
@@ -134,7 +146,7 @@ export default class eventEditView extends AbstractStatefulView {
 
   constructor({point = BLANK_POINT, offers, destinations, onResetClick, onSubmitClick, onDeleteClick, isCreating = false }){
     super();
-    this._setState(point);
+    this._setState(this.#parsePointToState(point));
     this.#initialValueOfPoint = JSON.parse(JSON.stringify(point));
     this.#onResetClick = onResetClick;
     this.#onSubmitClick = onSubmitClick;
@@ -143,13 +155,11 @@ export default class eventEditView extends AbstractStatefulView {
     this.#offers = offers;
     this.#destinations = destinations;
 
-    this.#setFlatpickr();
-
     this._restoreHandlers();
   }
 
   get template() {
-    return createEventEditElement(this._state, this.#isCreating, this.#offers, this.#destinations);
+    return createEventEditElement(this._state, this.#isCreating, this.#offers, this.#destinations, this._state.isDisabled, this._state.isSaving, this._state.isDeleting);
   }
 
   _restoreHandlers() {
@@ -160,10 +170,10 @@ export default class eventEditView extends AbstractStatefulView {
     }
 
     this.element
-      .querySelector('form')
-      .addEventListener('submit', this.#submitClickHandler);
+      .querySelector('.event__save-btn')
+      .addEventListener('click', this.#submitClickHandler);
 
-    if (this.#offers.find((offer) => offer.type === this._state.type).length !== 0) {
+    if (this.#offers.find((offer) => offer.type === this._state.type).offers.length !== 0) {
       this.element
         .querySelector('.event__available-offers')
         .addEventListener('change', this.#editCheckedPointHandler);
@@ -184,6 +194,22 @@ export default class eventEditView extends AbstractStatefulView {
     this.element
       .querySelector('.event__input--price')
       .addEventListener('change', this.#editPointPriceHandler);
+
+    this.#setFlatpickr();
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this.#datepickerStart) {
+      this.#datepickerStart.destroy();
+      this.#datepickerStart = null;
+    }
+
+    if (this.#datepickerEnd) {
+      this.#datepickerEnd.destroy();
+      this.#datepickerEnd = null;
+    }
   }
 
   #setFlatpickr() {
@@ -213,11 +239,6 @@ export default class eventEditView extends AbstractStatefulView {
     );
   }
 
-  #editDeletePointHandler = (evt) => {
-    evt.preventDefault();
-    this.#handleDeleteClick(this._state);
-  };
-
   #editStartDateChangeHandler = ([fullStartDate]) => {
     const dateFrom = dayjs(fullStartDate).format('YYYY-MM-DDTHH:mm');
 
@@ -237,19 +258,10 @@ export default class eventEditView extends AbstractStatefulView {
     });
   };
 
-  removeElement() {
-    super.removeElement();
-
-    if (this.#datepickerStart) {
-      this.#datepickerStart.destroy();
-      this.#datepickerStart = null;
-    }
-
-    if (this.#datepickerEnd) {
-      this.#datepickerEnd.destroy();
-      this.#datepickerEnd = null;
-    }
-  }
+  #editDeletePointHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleDeleteClick(this.#parseStateToPoint(this._state));
+  };
 
   #resetClickHandler = (evt) => {
     evt.preventDefault();
@@ -258,7 +270,7 @@ export default class eventEditView extends AbstractStatefulView {
 
   #submitClickHandler = (evt) => {
     evt.preventDefault();
-    this.#onSubmitClick(this._state);
+    this.#onSubmitClick(this.#parseStateToPoint(this._state));
   };
 
   #editCheckedPointHandler = (evt) => {
@@ -307,4 +319,23 @@ export default class eventEditView extends AbstractStatefulView {
       type: typePoint,
     });
   };
+
+  #parsePointToState(point) {
+    return {
+      ...point,
+      isDisabled: false,
+      isSaving: false,
+      isDeleting: false,
+    };
+  }
+
+  #parseStateToPoint(state) {
+    const point = { ...state };
+
+    delete point.isDisabled;
+    delete point.isSaving;
+    delete point.isDeleting;
+
+    return point;
+  }
 }

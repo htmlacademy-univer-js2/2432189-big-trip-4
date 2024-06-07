@@ -79,6 +79,41 @@ export default class PointPresenter {
     remove(this.#componentEventEdit);
   };
 
+  setSaving() {
+    if (this.#mode === MODE.EDITING) {
+      this.#componentEventEdit.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === MODE.EDITING) {
+      this.#componentEventEdit.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  }
+
+  setAborting() {
+    if (this.#mode === MODE.DEFAULT) {
+      this.#componentEvent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#componentEventEdit.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#componentEventEdit.shake(resetFormState);
+  }
+
   #replacePointToForm() {
     replace(this.#componentEventEdit, this.#componentEvent);
     document.addEventListener('keydown', this.#escKeyDownHandler);
@@ -113,14 +148,13 @@ export default class PointPresenter {
       isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       update,
     );
-    this.#replaceFormToPoint();
   };
 
-  #handleDeleteClick = (task) => {
+  #handleDeleteClick = (point) => {
     this.#onDataChange(
       UserAction.DELETE_TASK,
       UpdateType.MINOR,
-      task,
+      point,
     );
   };
 
