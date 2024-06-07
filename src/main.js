@@ -1,7 +1,6 @@
 import NewPointButtonView from './view/new-point-button-view.js';
 import { render } from './framework/render.js';
 import BoardPresenter from './presenter/board-presenter.js';
-import FilterPresenter from './presenter/filter-presenter.js';
 import OffersModel from './model/offers-model.js';
 import DestinationsModel from './model/destinations-model.js';
 import PointsModel from './model/points-model.js';
@@ -30,6 +29,7 @@ const filterModel = new FilterModel();
 const boardPresenter = new BoardPresenter({
   container: tripEventsContainer,
   siteMainContainer,
+  filterContainer,
   pointsModel,
   filterModel,
   offersModel,
@@ -37,11 +37,6 @@ const boardPresenter = new BoardPresenter({
   onNewPointDestroy: handleNewPointFormClose
 });
 
-const filterPresenter = new FilterPresenter({
-  filterContainer: filterContainer,
-  filterModel,
-  pointsModel
-});
 
 const newPointButtonComponent = new NewPointButtonView({
   onClick: handleNewPointButtonClick
@@ -61,5 +56,4 @@ pointsModel.init()
     render(newPointButtonComponent, siteMainContainer);
   });
 
-filterPresenter.init();
 boardPresenter.init();
