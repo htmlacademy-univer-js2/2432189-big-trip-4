@@ -36,7 +36,7 @@ const filter = {
 };
 
 function sortPointDay(points) {
-  return points.sort((firstPoint, secondPoint) => new Date(firstPoint.dateFrom) - new Date(secondPoint.dateTo));
+  return points.sort((firstPoint, secondPoint) => new Date(firstPoint.dateFrom) - new Date(secondPoint.dateFrom));
 }
 
 function sortPointTime(points) {
@@ -46,7 +46,7 @@ function sortPointTime(points) {
 }
 
 function sortPointPrice(points) {
-  return points.sort((firstPoint, secondPoint) => secondPoint.price - firstPoint.price);
+  return points.sort((firstPoint, secondPoint) => secondPoint.basePrice - firstPoint.basePrice);
 }
 
 export {
