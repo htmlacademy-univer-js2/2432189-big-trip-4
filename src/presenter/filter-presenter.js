@@ -20,11 +20,11 @@ export default class FilterPresenter {
   }
 
   get filters() {
-    const tasks = this.#pointsModel.points;
+    const points = this.#pointsModel.points;
 
     return Object.values(FilterType).map((type) => ({
       type,
-      count: filter[type](tasks).length
+      count: filter[type](points).length
     }));
   }
 
@@ -47,6 +47,10 @@ export default class FilterPresenter {
     remove(prevFilterComponent);
   }
 
+  destroy() {
+    remove(this.#filterComponent);
+  }
+
   #handleModelEvent = () => {
     this.init();
   };
@@ -58,8 +62,4 @@ export default class FilterPresenter {
 
     this.#filterModel.setFilter(UpdateType.MAJOR, filterType);
   };
-
-  destroy() {
-    remove(this.#filterComponent);
-  }
 }

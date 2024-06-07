@@ -5,7 +5,7 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import he from 'he';
 
-function getEditPointTTemplate(currentType) {
+function getEditPointTemplate(currentType) {
   return (
     `<div class="event__type-list">
         <fieldset class="event__type-group">
@@ -95,7 +95,7 @@ function createEventEditElement(point, isCreating, allOffers, destinations, isDi
                   <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
               </label>
               <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox" ${isDisabled ? 'disabled' : ''}>
-              ${getEditPointTTemplate(type)}
+              ${getEditPointTemplate(type)}
           </div>
 
           <div class="event__field-group  event__field-group--destination">

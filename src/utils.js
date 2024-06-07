@@ -29,10 +29,10 @@ function isEventPast(dateTo) {
 }
 
 const filter = {
-  [FilterType.EVERYTHING]: (events) => [...events],
-  [FilterType.FUTURE]: (events) => events.filter((event) => isEventFuture(event.date)),
-  [FilterType.PRESENT]: (events) => events.filter((event) => isEventPresent(event.date)),
-  [FilterType.PAST]: (events) => events.filter((event) => isEventPast(event.date)),
+  [FilterType.EVERYTHING]: (points) => [...points],
+  [FilterType.FUTURE]: (points) => points.filter((point) => isEventFuture(point.dateFrom)),
+  [FilterType.PRESENT]: (points) => points.filter((point) => isEventPresent(point.dateFrom, point.dateTo)),
+  [FilterType.PAST]: (points) => points.filter((point) => isEventPast(point.dateTo)),
 };
 
 function sortPointDay(points) {

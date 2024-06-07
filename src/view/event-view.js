@@ -87,6 +87,10 @@ export default class eventElementView extends AbstractView {
       .addEventListener('click', this.#favoriteClickHandler);
   }
 
+  get template() {
+    return createEventElement(this.#point, this.#offers, this.#destinations);
+  }
+
   #favoriteClickHandler = (evt) => {
     evt.preventDefault();
     this.#onFavoriteClick();
@@ -96,8 +100,4 @@ export default class eventElementView extends AbstractView {
     evt.preventDefault();
     this.#onEditClick();
   };
-
-  get template() {
-    return createEventElement(this.#point, this.#offers, this.#destinations);
-  }
 }

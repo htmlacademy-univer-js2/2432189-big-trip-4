@@ -38,16 +38,16 @@ export default class PointPresenter {
       point: this.#point,
       offers,
       destinations,
-      onEditClick: this.#onEditClick,
-      onFavoriteClick: this.#onFavoriteClick,
+      onEditClick: this.#handleEditClick,
+      onFavoriteClick: this.#handleFavoriteClick,
     });
 
     this.#componentEventEdit = new EventEditView({
       point: this.#point,
       offers,
       destinations,
-      onResetClick: this.#onResetClick,
-      onSubmitClick: this.#onSubmitClick,
+      onResetClick: this.#handleResetClick,
+      onSubmitClick: this.#handleSubmitClick,
       onDeleteClick: this.#handleDeleteClick,
     });
 
@@ -134,11 +134,11 @@ export default class PointPresenter {
     }
   };
 
-  #onEditClick = () => {
+  #handleEditClick = () => {
     this.#replacePointToForm();
   };
 
-  #onSubmitClick = (update) => {
+  #handleSubmitClick = (update) => {
     const isMinorUpdate = dayjs(update.dateFrom).isSame(this.#point.dateFrom)
     || dayjs(update.dateTo).isSame(this.#point.dateTo)
     || update.price === this.#point.price;
@@ -158,12 +158,12 @@ export default class PointPresenter {
     );
   };
 
-  #onResetClick = (point) => {
+  #handleResetClick = (point) => {
     this.#replaceFormToPoint();
-    this.#onSubmitClick(point);
+    this.#handleSubmitClick(point);
   };
 
-  #onFavoriteClick = () => {
+  #handleFavoriteClick = () => {
     this.#onDataChange(
       UserAction.UPDATE_TASK,
       UpdateType.PATCH,
