@@ -26,8 +26,6 @@ export default class PointsModel extends Observable{
         this.#offersModel.init()
       ]);
       this.#points = points.map(this.#adaptToClient);
-      // window.console.log(this.#points);
-      // window.console.log(this.#destinationsModel.destinations);
     } catch(err) {
       this.#points = [];
     }
