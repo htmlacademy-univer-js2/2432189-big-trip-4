@@ -2,6 +2,7 @@ import { remove, render, replace } from '../framework/render.js';
 import EventEditView from '../view/event-edit-view.js';
 import EventView from '../view/event-view.js';
 import { UserAction, UpdateType } from '../const.js';
+import { isEscKey } from '../utils.js';
 import dayjs from 'dayjs';
 
 
@@ -128,7 +129,7 @@ export default class PointPresenter {
   }
 
   #escKeyDownHandler = (evt) => {
-    if (evt.key === 'Escape') {
+    if (isEscKey(evt)) {
       evt.preventDefault();
       this.#replaceFormToPoint();
     }

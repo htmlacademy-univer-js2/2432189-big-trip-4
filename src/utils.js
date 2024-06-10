@@ -1,6 +1,8 @@
 import dayjs from 'dayjs';
 import { FilterType } from './const';
 
+const isEscKey = (evt) => evt.key === 'Escape';
+
 function timeDurationDays(dateFrom, dateTo) {
   const days = dayjs(dateTo).diff(dayjs(dateFrom), 'day');
   return days !== 0 ? `${days}D` : '';
@@ -59,5 +61,6 @@ export {
   filter,
   sortPointDay,
   sortPointTime,
-  sortPointPrice
+  sortPointPrice,
+  isEscKey
 };
